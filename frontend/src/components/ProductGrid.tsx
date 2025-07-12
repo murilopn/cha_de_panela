@@ -26,13 +26,10 @@ function ProductGrid() {
     // Função assíncrona para buscar os produtos
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/produtos");
-
-        // Se a resposta da rede não for 'ok' (ex: erro 404, 500), lançamos um erro.
+        const response = await fetch("/api/produtos"); //Se a resposta da rede não for 'ok' (ex: erro 404, 500), lançamos um erro.
         if (!response.ok) {
           throw new Error("Não foi possível carregar a lista de presentes.");
         }
-
         const data: Produto[] = await response.json();
         setProducts(data); // Sucesso! Guardamos os produtos no nosso estado.
       } catch (err) {
@@ -63,45 +60,32 @@ function ProductGrid() {
   };
 
   const handleConfirmPurchase = async () => {
-    if (!selectedProduct) return; // Garante que há um produto selecionado
+    if (!selectedProduct) return;
 
     try {
-      // 1. CHAME A SUA API USANDO ASYNC/AWAIT
-      const response = await fetch(
-        `http://localhost:3000/produtos/${selectedProduct.id}`,
-        {
-          method: "PATCH", // Usamos PATCH para atualizar apenas uma parte do recurso
-          headers: {
-            "Content-Type": "application/json",
-          },
-          // O corpo da requisição é um JSON com a propriedade que você quer alterar
-          body: JSON.stringify({ disponivel: false }),
-        }
-      );
+      const response = await fetch(`/api/produtos/${selectedProduct.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disponivel: false }),
+      });
 
-      // 2. VERIFIQUE SE A REQUISIÇÃO FOI BEM SUCEDIDA
       if (!response.ok) {
         throw new Error(
           "Não foi possível atualizar o produto no banco de dados."
         );
       }
 
-      // 3. SE A REQUISIÇÃO FOI BEM SUCEDIDA, ATUALIZE O ESTADO DO COMPONENTE
-      const updatedProducts = products.map((product) => {
-        if (product.id === selectedProduct.id) {
-          return { ...product, disponivel: false };
-        }
-        return product;
-      });
+      const updatedProducts = products.map((product) =>
+        product.id === selectedProduct.id
+          ? { ...product, disponivel: false }
+          : product
+      );
       setProducts(updatedProducts);
 
-      // 4. Mantenha o resto da sua lógica
-      handleCloseModal();
-      setShowThankYou(true);
+      setShowThankYou(true); // <- mantém o produto selecionado
+      setIsModalOpen(false); // <- só fecha o modal de compra
     } catch (error) {
       console.error("Erro ao confirmar a compra:", error);
-      // Aqui você pode adicionar lógica para mostrar um erro ao usuário
-      // setError("Ocorreu um erro ao finalizar a compra. Tente novamente.");
     }
   };
 
@@ -139,8 +123,14 @@ function ProductGrid() {
       />
 
       {/* 4. RENDERIZE A TELA DE AGRADECIMENTO CONDICIONALMENTE */}
-      {showThankYou && (
-        <ThankYouScreen onClose={() => setShowThankYou(false)} />
+      {showThankYou && selectedProduct && (
+        <ThankYouScreen
+          productPrice={selectedProduct.preco}
+          onClose={() => {
+            setShowThankYou(false);
+            setSelectedProduct(null); // <- só aqui limpamos
+          }}
+        />
       )}
     </>
   );

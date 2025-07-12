@@ -1,30 +1,38 @@
+// backend/app.module.ts
+
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ProdutosModule } from './produtos/produtos.module'; // Importe o seu módulo de produtos
-import { Produto } from './produtos/entities/produto.entity'; // Importe a sua entidade
+import { ProdutosModule } from './produtos/produtos.module';
+import { Produto } from './produtos/entities/produto.entity';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ConfigModule, ConfigService } from '@nestjs/config'; // 1. IMPORTE O ConfigService
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    // 1. Configuração da conexão principal com o banco de dados
-    TypeOrmModule.forRoot({
-      type: 'postgres', // O tipo do banco de dados
-      host: 'localhost', // O endereço do seu servidor de banco. 'localhost' se estiver na sua máquina.
-      port: 5432, // A porta padrão do PostgreSQL
-      username: 'postgres', // O usuário que você configurou. 'postgres' é o padrão.
-      password: 'arias21', // <<< COLOQUE A SENHA DO SEU BANCO DE DADOS AQUI
-      database: 'cha_de_panela', // O nome do banco de dados que você criou
-      entities: [Produto], // Lista de todas as entidades que o TypeORM deve conhecer
-      synchronize: true, // CUIDADO: Em desenvolvimento, isso atualiza o banco com base nas entidades. Em produção, use migrations.
+    // 2. SUBSTITUA O TypeOrmModule.forRoot POR forRootAsync
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule], // Garante que o ConfigModule esteja disponível aqui
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('POSTGRES_HOST'),
+        port: configService.get<number>('POSTGRES_PORT'),
+        username: configService.get<string>('POSTGRES_USER'),
+        password: configService.get<string>('POSTGRES_PASSWORD'),
+        database: configService.get<string>('POSTGRES_DB'),
+        entities: [Produto],
+        synchronize: true,
+      }),
+      inject: [ConfigService], // Injeta o ConfigService na nossa factory
     }),
-
-    // 2. Importando o módulo de produtos que você criou
     ProdutosModule,
   ],
   controllers: [AppController],

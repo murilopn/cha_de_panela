@@ -6,9 +6,10 @@ import qrCodeImage from "../assets/image.png";
 
 interface ThankYouProps {
   onClose: () => void;
+  productPrice: number;
 }
 
-function ThankYouScreen({ onClose }: ThankYouProps) {
+function ThankYouScreen({ onClose, productPrice }: ThankYouProps) {
   const overlayStyle: React.CSSProperties = {
     position: "fixed",
     top: 0,
@@ -59,8 +60,8 @@ function ThankYouScreen({ onClose }: ThankYouProps) {
             <div className="mt-4 max-w-md text-center">
               <p className="text-gray-700 text-base leading-relaxed">
                 Este QR Code encaminhará a cobrança diretamente para a conta do
-                Danilo. Insira o valor do produto e confira o nome do
-                destinatário antes de fazer o depósito.
+                Danilo. Insira o valor de R$ {productPrice} do produto e confira
+                o nome do destinatário antes de fazer o depósito.
               </p>
             </div>
 

@@ -11,21 +11,18 @@ export class ProdutosService {
   ) {}
 
   findAll(): Promise<Produto[]> {
-    return this.produtosRepository.find({
-      where: {
-        disponivel: true,
-      },
-    });
+    return this.produtosRepository.find();
   }
 
   async updateDisponibilidade(id: number, disponivel: boolean) {
-    const produtoToUpdate = await this.produtosRepository.findOneBy({ id });
+    // const produtoToUpdate = await this.produtosRepository.findOneBy({ id });
 
-    if (!produtoToUpdate) {
-      throw new Error(`Produto com ID ${id} não encontrado.`);
-    }
+    // if (!produtoToUpdate) {
+    //   throw new Error(`Produto com ID ${id} não encontrado.`);
+    // }
 
-    produtoToUpdate.disponivel = disponivel;
-    return await this.produtosRepository.save(produtoToUpdate);
+    // produtoToUpdate.disponivel = disponivel;
+    // return await this.produtosRepository.save(produtoToUpdate);
+    return;
   }
 }

@@ -16,7 +16,7 @@ interface Props {
 
 function ProductCard({ produto, onImageClick }: Props) {
   // 2. RECEBA A PROP AQUI
-  const imageUrl = `http://localhost:3000/${produto.url_imagem}`;
+  const imageUrl = `/api/${produto.url_imagem}`;
   if (produto.disponivel) {
     return (
       <div className="flex flex-col gap-3 pb-3 w-full max-w-[240px] bg-white">
